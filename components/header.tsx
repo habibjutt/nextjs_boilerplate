@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,10 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { User, CreditCard, LogOut, LayoutDashboard } from "lucide-react";
+import { User, CreditCard, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface HeaderProps {
   user?: {
@@ -28,6 +30,8 @@ interface HeaderProps {
 
 export function Header({ user, isAdmin }: HeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   async function handleSignOut() {
     try {
@@ -52,11 +56,11 @@ export function Header({ user, isAdmin }: HeaderProps) {
     <header className="border-b">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Logo />
-        {user ? (
-          <div className="flex items-center gap-4">
-            {/* <span className="text-sm text-muted-foreground hidden sm:inline">
-              <span className="font-medium text-foreground">{user.name}</span>
-            </span> */}
+
+        {/* Desktop navigation */}
+        <div className="hidden md:flex items-center gap-4">
+          <ThemeToggle />
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
@@ -106,21 +110,128 @@ export function Header({ user, isAdmin }: HeaderProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-        ) : (
-          <nav className="flex items-center gap-4">
-            <Button variant="ghost" asChild>
-              <Link href="/contact">Contact</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/signup">Sign Up</Link>
-            </Button>
-          </nav>
-        )}
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/contact">Contact</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
+        </div>
+
+        {/* Mobile: theme toggle + hamburger button */}
+        <div className="md:hidden flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            className="p-2 rounded-md hover:bg-accent"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t bg-background">
+          <nav className="container mx-auto px-4 py-4 flex flex-col gap-3">
+            <Link
+              href="/contact"
+              className={`text-sm font-medium py-2 transition-colors hover:text-primary ${
+                pathname === "/contact" ? "text-primary" : "text-muted-foreground"
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Contact
+            </Link>
+            <div className="border-t pt-3 flex flex-col gap-2">
+              {user ? (
+                <>
+                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="text-xs text-muted-foreground mb-2">{user.email}</p>
+                  {isAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Link href="/dashboard">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link href="/profile">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link href="/billing">
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Billing
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      handleSignOut();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="text-destructive justify-start"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link href="/login">Login</Link>
+                  </Button>
+                  <Button
+                    size="sm"
+                    asChild
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

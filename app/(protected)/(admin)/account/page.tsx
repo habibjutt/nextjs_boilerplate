@@ -2,8 +2,10 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { ProfileForm } from "@/components/profile-form";
 import { PasswordChangeForm } from "@/components/password-change-form";
+import { AvatarUpload } from "@/components/avatar-upload";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
 export default async function AccountPage() {
   const session = await auth.api.getSession({
@@ -28,6 +30,20 @@ export default async function AccountPage() {
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Picture</CardTitle>
+                  <CardDescription>
+                    Upload a profile picture to personalise your account
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AvatarUpload />
+                </CardContent>
+              </Card>
+
+              <Separator />
+
               <Card>
                 <CardHeader>
                   <CardTitle>Profile Information</CardTitle>

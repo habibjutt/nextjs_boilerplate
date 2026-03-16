@@ -22,6 +22,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { z } from "zod"
+import { SocialLoginButtons } from "@/components/social-login-buttons"
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -50,7 +51,6 @@ export function LoginForm({
     const emailValue = formData.get("email") as string
     const password = formData.get("password") as string
 
-    // Validate with Zod
     const validation = loginSchema.safeParse({ email: emailValue, password })
 
     if (!validation.success) {
@@ -72,10 +72,8 @@ export function LoginForm({
       })
 
       if (error) {
-        // Check if error is due to unverified email
         if (error.message?.toLowerCase().includes("email not verified") || 
             error.message?.toLowerCase().includes("verify")) {
-          // Send OTP and show verification screen
           setEmail(emailValue)
           await handleSendOtp(emailValue)
           setShowOtpVerification(true)
@@ -287,12 +285,15 @@ export function LoginForm({
                   Don&apos;t have an account? <a href="/signup">Sign up</a>
                 </FieldDescription>
               </Field>
+              <SocialLoginButtons mode="login" />
             </FieldGroup>
           </form>
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{
+          " "
+        }
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>

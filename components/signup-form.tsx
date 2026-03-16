@@ -23,12 +23,12 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { z } from "zod"
 import { isValidPhoneNumber, type Value } from "react-phone-number-input"
+import { SocialLoginButtons } from "@/components/social-login-buttons"
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   phone: z.union([z.string(), z.undefined()]).optional().refine((val) => {
-    // Phone is optional - empty or valid
     if (!val || val.length === 0) return true;
     try {
       return isValidPhoneNumber(val);
@@ -69,7 +69,6 @@ export function SignupForm({
     const password = formData.get("password") as string
     const confirmPassword = formData.get("confirm-password") as string
 
-    // Validate with Zod
     const validation = signupSchema.safeParse({ 
       name, 
       email: emailValue, 
@@ -101,7 +100,6 @@ export function SignupForm({
         name,
       };
       
-      // Add phone if provided
       if (phone) {
         signupData.phone = phone;
       }
@@ -114,7 +112,6 @@ export function SignupForm({
         return
       }
 
-      // Show OTP verification form
       setEmail(emailValue)
       setShowOtpVerification(true)
       toast.success("Account created! Please check your email for the verification code.")
@@ -360,12 +357,15 @@ export function SignupForm({
                   Already have an account? <a href="/login">Sign in</a>
                 </FieldDescription>
               </Field>
+              <SocialLoginButtons mode="signup" />
             </FieldGroup>
           </form>
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{
+          " "
+        }
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>

@@ -4,6 +4,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { formatDistanceToNow } from "date-fns"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = {
   title: "Blog",
   description: "Latest articles and updates",

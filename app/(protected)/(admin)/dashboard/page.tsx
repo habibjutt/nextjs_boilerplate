@@ -5,6 +5,8 @@ import { getDashboardStats } from "./actions"
 
 import data from "./data.json"
 
+export const dynamic = "force-dynamic"
+
 export default async function Page() {
   const stats = await getDashboardStats()
 

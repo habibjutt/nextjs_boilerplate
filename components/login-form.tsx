@@ -29,10 +29,30 @@ const loginSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 })
 
+/**
+ * Validate that a callbackUrl is a safe relative path to prevent open redirect attacks.
+ * Only allows paths that start with "/" and do not start with "//" (protocol-relative URLs).
+ * Rejects any URL that contains a host component when parsed.
+ */
+const getSafeCallbackUrl = (url?: string): string | undefined => {
+  if (!url) return undefined;
+  try {
+    // Reject protocol-relative or absolute URLs
+    if (!url.startsWith("/") || url.startsWith("//")) return undefined;
+    // Use URL parsing with a dummy base to detect embedded hostnames
+    const parsed = new URL(url, "http://localhost");
+    if (parsed.hostname !== "localhost") return undefined;
+    return url;
+  } catch {
+    return undefined;
+  }
+}
+
 export function LoginForm({
   className,
+  callbackUrl,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { callbackUrl?: string }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -101,7 +121,7 @@ export function LoginForm({
       }
 
       toast.success("Logged in successfully!")
-      const redirectUrl = await getRedirectUrl()
+      const redirectUrl = getSafeCallbackUrl(callbackUrl) || await getRedirectUrl()
       router.push(redirectUrl)
     } catch (error: any) {
       toast.error(error.message || "Failed to login")
@@ -179,7 +199,7 @@ export function LoginForm({
         return
       }
       toast.success("Logged in successfully!")
-      const redirectUrl = await getRedirectUrl()
+      const redirectUrl = getSafeCallbackUrl(callbackUrl) || await getRedirectUrl()
       router.push(redirectUrl)
     } catch (error: any) {
       toast.error(error.message || "Failed to verify code")

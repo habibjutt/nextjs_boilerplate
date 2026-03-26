@@ -4,8 +4,7 @@ FROM node:22-alpine AS base
 FROM base AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-COPY prisma ./prisma/
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # --- Build ---
 FROM base AS builder
@@ -14,7 +13,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npx prisma generate
+# prisma generate is included in the build script
 RUN npm run build
 
 # --- Production ---
